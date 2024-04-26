@@ -1,0 +1,79 @@
+import random
+
+# 카드 덱 만들기
+suits = ['하트', '다이아몬드', '스페이드', '클로버']
+ranks = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A']
+
+deck = [(rank, suit) for suit in suits for rank in ranks]
+
+# 카드 값을 계산하는 함수
+def calculate_total(cards):
+    total = 0
+    num_aces = 0
+
+    for card in cards:
+        rank = card[0]
+        if rank in ['J', 'Q', 'K']:
+            total += 10
+        elif rank == 'A':
+            num_aces += 1
+            total += 11
+        else:
+            total += int(rank)
+
+    while total > 21 and num_aces:
+        total -= 10
+        num_aces -= 1
+
+    return total
+
+# 게임 시작
+def blackjack_game():
+    player_cards = []
+    dealer_cards = []
+
+    # 카드 섞기
+    random.shuffle(deck)
+
+    # 카드 나눠주기
+    player_cards.append(deck.pop())
+    dealer_cards.append(deck.pop())
+    player_cards.append(deck.pop())
+    dealer_cards.append(deck.pop())
+
+    # 딜러의 첫 번째 카드 보여주기
+    print("딜러의 카드: [X,", dealer_cards[1][0], "]")
+    print("당신의 카드:", player_cards)
+
+    # 플레이어가 카드를 계속 받을지 여부 확인
+    while calculate_total(player_cards) < 21:
+        action = input("카드를 더 받으시겠습니까? (Y/N): ").lower()
+        if action == 'y':
+            player_cards.append(deck.pop())
+            print("당신의 카드:", player_cards)
+        else:
+            break
+
+    # 딜러가 카드를 뽑음
+    while calculate_total(dealer_cards) < 17:
+        dealer_cards.append(deck.pop())
+
+    # 게임 결과 확인
+    player_total = calculate_total(player_cards)
+    dealer_total = calculate_total(dealer_cards)
+
+    print("딜러의 카드:", dealer_cards)
+    print("딜러의 카드 합계:", dealer_total)
+
+    if player_total > 21:
+        print("카드 합계가 21을 초과하여 패배하셨습니다.")
+    elif dealer_total > 21 or player_total > dealer_total:
+        print("축하합니다! 당신이 이겼습니다!")
+    elif player_total == dealer_total:
+        print("무승부입니다.")
+    else:
+        print("패배하셨습니다.")
+
+# 게임 실행
+if __name__ == "__main__":
+    blackjack_game()
