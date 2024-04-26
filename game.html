@@ -1,79 +1,145 @@
-import random
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>블랙잭 게임</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+    </style>
+</head>
+<body>
+    <h1>블랙잭 게임</h1>
+    <div>
+        <button id="start-btn">게임 시작</button>
+    </div>
+    <div id="game-area" style="display: none;">
+        <h2>딜러의 카드: <span id="dealer-cards"></span></h2>
+        <h2>당신의 카드: <span id="player-cards"></span></h2>
+        <button id="hit-btn">카드 더 받기</button>
+        <button id="stand-btn">그만 받기</button>
+        <h2 id="result"></h2>
+    </div>
 
-# 카드 덱 만들기
-suits = ['하트', '다이아몬드', '스페이드', '클로버']
-ranks = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A']
+    <script>
+        document.getElementById('start-btn').addEventListener('click', startGame);
 
-deck = [(rank, suit) for suit in suits for rank in ranks]
+        function startGame() {
+            document.getElementById('start-btn').style.display = 'none';
+            document.getElementById('game-area').style.display = 'block';
 
-# 카드 값을 계산하는 함수
-def calculate_total(cards):
-    total = 0
-    num_aces = 0
+            var suits = ['하트', '다이아몬드', '스페이드', '클로버'];
+            var ranks = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
 
-    for card in cards:
-        rank = card[0]
-        if rank in ['J', 'Q', 'K']:
-            total += 10
-        elif rank == 'A':
-            num_aces += 1
-            total += 11
-        else:
-            total += int(rank)
+            var deck = [];
+            for (var suit of suits) {
+                for (var rank of ranks) {
+                    deck.push({ rank: rank, suit: suit });
+                }
+            }
 
-    while total > 21 and num_aces:
-        total -= 10
-        num_aces -= 1
+            var dealerCards = [];
+            var playerCards = [];
 
-    return total
+            // 카드 뽑는 함수
+            function drawCard() {
+                return deck.pop();
+            }
 
-# 게임 시작
-def blackjack_game():
-    player_cards = []
-    dealer_cards = []
+            // 카드 합계 계산 함수
+            function calculateTotal(cards) {
+                var total = 0;
+                var numAces = 0;
 
-    # 카드 섞기
-    random.shuffle(deck)
+                for (var card of cards) {
+                    var rank = card.rank;
+                    if (rank === 'J' || rank === 'Q' || rank === 'K') {
+                        total += 10;
+                    } else if (rank === 'A') {
+                        numAces++;
+                        total += 11;
+                    } else {
+                        total += parseInt(rank);
+                    }
+                }
 
-    # 카드 나눠주기
-    player_cards.append(deck.pop())
-    dealer_cards.append(deck.pop())
-    player_cards.append(deck.pop())
-    dealer_cards.append(deck.pop())
+                while (total > 21 && numAces > 0) {
+                    total -= 10;
+                    numAces--;
+                }
 
-    # 딜러의 첫 번째 카드 보여주기
-    print("딜러의 카드: [X,", dealer_cards[1][0], "]")
-    print("당신의 카드:", player_cards)
+                return total;
+            }
 
-    # 플레이어가 카드를 계속 받을지 여부 확인
-    while calculate_total(player_cards) < 21:
-        action = input("카드를 더 받으시겠습니까? (Y/N): ").lower()
-        if action == 'y':
-            player_cards.append(deck.pop())
-            print("당신의 카드:", player_cards)
-        else:
-            break
+            // 게임 초기화
+            function initGame() {
+                dealerCards = [];
+                playerCards = [];
 
-    # 딜러가 카드를 뽑음
-    while calculate_total(dealer_cards) < 17:
-        dealer_cards.append(deck.pop())
+                // 카드 섞기
+                deck = deck.sort(() => Math.random() - 0.5);
 
-    # 게임 결과 확인
-    player_total = calculate_total(player_cards)
-    dealer_total = calculate_total(dealer_cards)
+                // 카드 나눠주기
+                playerCards.push(drawCard());
+                dealerCards.push(drawCard());
+                playerCards.push(drawCard());
+                dealerCards.push(drawCard());
 
-    print("딜러의 카드:", dealer_cards)
-    print("딜러의 카드 합계:", dealer_total)
+                // 화면에 카드 표시
+                showCards();
+            }
 
-    if player_total > 21:
-        print("카드 합계가 21을 초과하여 패배하셨습니다.")
-    elif dealer_total > 21 or player_total > dealer_total:
-        print("축하합니다! 당신이 이겼습니다!")
-    elif player_total == dealer_total:
-        print("무승부입니다.")
-    else:
-        print("패배하셨습니다.")
+            // 카드 화면에 표시 함수
+            function showCards() {
+                document.getElementById('dealer-cards').innerHTML = dealerCards[0].rank + ', ?';
+                document.getElementById('player-cards').innerHTML = playerCards.map(card => card.rank).join(', ');
+            }
 
-# 게임 실행
-if __name__ == "__main__":
-    blackjack_game()
+            // 게임 결과 표시 함수
+            function showResult(result) {
+                document.getElementById('result').innerText = result;
+            }
+
+            // 딜러의 카드 오픈 함수
+            function openDealerCards() {
+                document.getElementById('dealer-cards').innerHTML = dealerCards.map(card => card.rank).join(', ');
+            }
+
+            // 게임 진행 함수
+            function playGame() {
+                document.getElementById('hit-btn').addEventListener('click', function() {
+                    playerCards.push(drawCard());
+                    showCards();
+                    var playerTotal = calculateTotal(playerCards);
+                    if (playerTotal > 21) {
+                        showResult('카드 합계가 21을 초과하여 패배하셨습니다.');
+                        openDealerCards();
+                    }
+                });
+
+                document.getElementById('stand-btn').addEventListener('click', function() {
+                    openDealerCards();
+                    var dealerTotal = calculateTotal(dealerCards);
+                    while (dealerTotal < 17) {
+                        dealerCards.push(drawCard());
+                        dealerTotal = calculateTotal(dealerCards);
+                    }
+                    var playerTotal = calculateTotal(playerCards);
+                    if (dealerTotal > 21 || playerTotal > dealerTotal) {
+                        showResult('축하합니다! 당신이 이겼습니다!');
+                    } else if (dealerTotal > playerTotal) {
+                        showResult('패배하셨습니다.');
+                    } else {
+                        showResult('무승부입니다.');
+                    }
+                });
+            }
+
+            initGame();
+            playGame();
+        }
+    </script>
+</body>
+</html>
